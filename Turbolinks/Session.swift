@@ -110,14 +110,13 @@ open class Session: NSObject {
                 visitable.updateVisitableScreenshot()
                 visitable.showVisitableScreenshot()
             }
-
+            
             visitable.deactivateVisitableWebView()
             activatedVisitable = nil
         }
     }
 
     // MARK: Visitable restoration identifiers
-
     fileprivate var visitableRestorationIdentifiers = NSMapTable<UIViewController, NSString>(keyOptions: NSPointerFunctions.Options.weakMemory, valueOptions: [])
 
     fileprivate func restorationIdentifierForVisitable(_ visitable: Visitable) -> String? {
@@ -140,7 +139,7 @@ extension Session: VisitDelegate {
     func visitRequestDidStart(_ visit: Visit) {
         delegate?.sessionDidStartRequest(self)
     }
-
+    
     func visitRequestDidFinish(_ visit: Visit) {
         delegate?.sessionDidFinishRequest(self)
     }
@@ -199,7 +198,7 @@ extension Session: VisitableDelegate {
     public func visitableViewWillAppear(_ visitable: Visitable) {
         guard let topmostVisit = self.topmostVisit, let currentVisit = self.currentVisit else { return }
 
-        if visitable === topmostVisit.visitable && visitable.visitableViewController.isMovingToParent {
+        if visitable === topmostVisit.visitable && visitable.visitableViewController.isMovingToParentViewController {
             // Back swipe gesture canceled
             if topmostVisit.state == .completed {
                 currentVisit.cancel()
@@ -279,7 +278,7 @@ extension Session: WKNavigationDelegate {
             reload()
         }
     }
-
+    
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         self.reload()
         self.webView.reload()
@@ -287,19 +286,19 @@ extension Session: WKNavigationDelegate {
 
     fileprivate struct NavigationDecision {
         let navigationAction: WKNavigationAction
-
+        
         var policy: WKNavigationActionPolicy {
             return navigationAction.navigationType == .linkActivated || isMainFrameNavigation ? .cancel : .allow
         }
-
+        
         var externallyOpenableURL: URL? {
-            if let URL = navigationAction.request.url , shouldOpenURLExternally {
+            if let URL = navigationAction.request.url, shouldOpenURLExternally {
                 return URL
             } else {
                 return nil
             }
         }
-
+        
         var shouldOpenURLExternally: Bool {
             let type = navigationAction.navigationType
             return type == .linkActivated || (isMainFrameNavigation && type == .other)
@@ -309,12 +308,12 @@ extension Session: WKNavigationDelegate {
             let type = navigationAction.navigationType
             return isMainFrameNavigation && type == .reload
         }
-
+        
         var isMainFrameNavigation: Bool {
             return navigationAction.targetFrame?.isMainFrame ?? false
         }
     }
-
+    
     fileprivate func openExternalURL(_ URL: Foundation.URL) {
         delegate?.session(self, openExternalURL: URL)
     }
